@@ -1,6 +1,6 @@
 export interface ITask {
-  id?: number;
-  userId: number;
+  id: string;
+  userId: string;
   title: string;
   summary: string;
   dueDate: string;

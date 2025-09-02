@@ -1,44 +1,60 @@
 import { Injectable } from '@angular/core';
-import { ITask } from '../interfaces/task-interface';
-import { HttpClient } from '@angular/common/http';
+import { INewTask } from '../interfaces/task-interface';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TasksService {
-  constructor(private httpClient: HttpClient) {}
-  url = 'http://localhost:8080/api/tasks';
+  private tasks = [
+    {
+      id: 't1',
+      userId: 'u1',
+      title: 'Master Angular',
+      summary:
+        'Learn all the basic and advanced features of Angular & how to apply them.',
+      dueDate: '2025-12-31',
+    },
+    {
+      id: 't2',
+      userId: 'u3',
+      title: 'Build first prototype',
+      summary: 'Build a first prototype of the online shop website',
+      dueDate: '2024-05-31',
+    },
+    {
+      id: 't3',
+      userId: 'u3',
+      title: 'Prepare issue template',
+      summary:
+        'Prepare and describe an issue template which will help with project management',
+      dueDate: '2024-06-15',
+    },
+  ];
 
-  private tasks: ITask[] = [];
-
-  getAllTasks() {
-    this.httpClient.get<ITask[]>(this.url).subscribe({
-      next: (value: ITask[]) => {
-        this.tasks = value;
-      },
-    });
+  constructor() {
+    const tasks = localStorage.getItem('tasks');
+    if (tasks) {
+      this.tasks = JSON.parse(tasks);
+    }
   }
-
-  getUserTasks(userId: number) {
-    return this.tasks.filter((task: ITask) => task.userId === userId);
+  getUserTasks(userId: string) {
+    return this.tasks.filter((task) => task.userId === userId);
   }
-  addTask(taskData: ITask) {
-    this.httpClient.post(this.url, taskData).subscribe({
-      next: (value) => {
-        console.log(value);
-        this.getAllTasks();
-      },
-      error: (err) => {
-        console.error(err);
-      },
+  addTask(taskData: INewTask, userId: string) {
+    this.tasks.unshift({
+      id: Math.random().toFixed(3).toString(),
+      userId: userId,
+      title: taskData.title,
+      summary: taskData.title,
+      dueDate: taskData.date,
     });
+    this.saveTask();
   }
-
-  removeTask(id: number) {
-    this.httpClient.delete<ITask>(`${this.url}/${id}`).subscribe({
-      next: () => {
-        this.getAllTasks();
-      },
-    });
+  removeTask(id: string) {
+    this.tasks = this.tasks.filter((task) => task.id !== id);
+    this.saveTask();
+  }
+  saveTask() {
+    localStorage.setItem('tasks', JSON.stringify(this.tasks));
   }
 }
